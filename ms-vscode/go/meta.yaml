@@ -12,7 +12,7 @@ category: Language
 firstPublicationDate: '2019-06-20'
 spec:
   containers:
-    - image: "aandrienko/che-remote-plugin-go-1.10.7:latest"
+    - image: "docker.io/aandrienko/che-remote-plugin-go-1.10.7:latest"
       name: vscode-go
       memoryLimit: '512Mi'
       env:
