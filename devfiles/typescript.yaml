@@ -1,0 +1,51 @@
+metadata:
+  name: typescript-release-test
+projects:
+  - name: angular-realworld-example-app
+    source:
+      location: 'https://github.com/gothinkster/angular-realworld-example-app'
+      type: git
+      branch: master
+components:
+  - type: chePlugin
+    reference: >-
+      https://raw.githubusercontent.com/AndrienkoAleksandr/che-remote-plugin-registry/master/che-incubator/typescript/latest/meta.yaml
+    alias: typescript
+  - mountSources: true
+    endpoints:
+      - name: angular
+        port: 4200
+    memoryLimit: 1Gi
+    type: dockerimage
+    alias: nodejs
+    image: 'quay.io/eclipse/che-nodejs10-community:nightly'
+  - type: cheEditor
+    reference: >-
+      https://raw.githubusercontent.com/AndrienkoAleksandr/che-remote-plugin-registry/master/eclipse/che-theia/latest/meta.yaml
+    alias: che-theia
+apiVersion: 1.0.0
+commands:
+  - name: yaraandrienkon install
+    actions:
+      - workdir: '${CHE_PROJECTS_ROOT}/angular-realworld-example-app'
+        type: exec
+        command: yarn install
+        component: nodejs
+  - name: build
+    actions:
+      - workdir: '${CHE_PROJECTS_ROOT}/angular-realworld-example-app'
+        type: exec
+        command: yarn run build
+        component: nodejs
+  - name: start
+    actions:
+      - workdir: '${CHE_PROJECTS_ROOT}/angular-realworld-example-app'
+        type: exec
+        command: yarn run start --host 0.0.0.0 --disableHostCheck true
+        component: nodejs
+  - name: lint
+    actions:
+      - workdir: '${CHE_PROJECTS_ROOT}/angular-realworld-example-app'
+        type: exec
+        command: yarn run lint
+        component: nodejs

@@ -1,0 +1,70 @@
+metadata:
+  name: dotnet-release
+projects:
+  - name: dotnet-web-simple
+    source:
+      location: 'https://github.com/che-samples/dotnet-web-simple'
+      type: git
+      branch: netcoreapp2.2
+components:
+  - memoryLimit: 1024Mi
+    type: chePlugin
+    reference: >-
+      https://raw.githubusercontent.com/eclipse/che-plugin-registry/496ae387db0c3f4d2779e688e9c32d35299c9de4/v3/plugins/redhat-developer/che-omnisharp-plugin/0.0.4/meta.yaml
+    alias: omnisharp
+  - id: redhat-developer/netcoredbg-theia-plugin/latest
+    memoryLimit: 512Mi
+    type: chePlugin
+    alias: netcoredbg
+  - mountSources: true
+    endpoints:
+      - name: 5000/tcp
+        port: 5000
+    memoryLimit: 512Mi
+    type: dockerimage
+    volumes:
+      - name: dotnet
+        containerPath: /home/user
+    alias: dotnet
+    image: 'quay.io/eclipse/che-dotnet-2.2:nightly'
+  - reference: >-
+      https://raw.githubusercontent.com/eclipse/che-plugin-registry/master/v3/plugins/eclipse/che-theia/latest/meta.yaml
+    type: cheEditor
+apiVersion: 1.0.0
+commands:
+  - name: update dependencies
+    actions:
+      - workdir: '${CHE_PROJECTS_ROOT}/dotnet-web-simple'
+        type: exec
+        command: dotnet restore
+        component: dotnet
+  - name: run
+    actions:
+      - workdir: '${CHE_PROJECTS_ROOT}/dotnet-web-simple'
+        type: exec
+        command: dotnet run
+        component: dotnet
+  - name: build
+    actions:
+      - workdir: '${CHE_PROJECTS_ROOT}/dotnet-web-simple'
+        type: exec
+        command: dotnet build
+        component: dotnet
+  - name: Launch .NET Web Application on Debug mode
+    actions:
+      - referenceContent: |
+          {
+            "version": "0.2.0",
+              "configurations": [
+                {
+                    "type": "netcoredbg",
+                    "request": "launch",
+                    "program": "/projects/dotnet-web-simple/bin/Debug/netcoreapp2.2/web.dll",
+                    "args": [],
+                    "name": ".NET Core Launch (console)",
+                    "stopAtEntry": false,
+                    "console": "internalConsole"
+                }
+            ]
+          }
+        type: vscode-launch

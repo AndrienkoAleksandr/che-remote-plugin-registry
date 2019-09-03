@@ -1,0 +1,73 @@
+metadata:
+  name: php-release
+projects:
+  - name: symfony-demo-application
+    source:
+      location: 'https://github.com/symfony/demo.git'
+      type: git
+      branch: master
+components:
+  - memoryLimit: 1Gi
+    type: chePlugin
+    reference: >-
+      https://raw.githubusercontent.com/AndrienkoAleksandr/che-remote-plugin-registry/master/redhat/php/latest/meta.yaml
+  - id: redhat/php-debugger/latest
+    memoryLimit: 256Mi
+    type: chePlugin
+  - mountSources: true
+    endpoints:
+      - name: 8000/tcp
+        port: 8000
+    memoryLimit: 512Mi
+    type: dockerimage
+    volumes:
+      - name: composer
+        containerPath: /home/user/.composer
+      - name: symfony
+        containerPath: /home/user/.symfony
+    alias: php
+    image: 'quay.io/eclipse/che-php-7:nightly'
+  - mountSources: false
+    endpoints:
+      - name: db
+        port: 3306
+        attributes:
+          discoverable: 'true'
+    memoryLimit: 256Mi
+    type: dockerimage
+    alias: mysql
+    image: centos/mysql-57-centos7
+    env:
+      - value: db_user
+        name: MYSQL_USER
+      - value: db_password
+        name: MYSQL_PASSWORD
+      - value: db_password
+        name: MYSQL_ROOT_PASSWORD
+      - value: db_name
+        name: MYSQL_DATABASE
+  - type: cheEditor
+    reference: >-
+      https://raw.githubusercontent.com/AndrienkoAleksandr/che-remote-plugin-registry/master/eclipse/che-theia/latest/meta.yaml
+apiVersion: 1.0.0
+commands:
+  - name: Start Symfony Web Server
+    actions:
+      - workdir: '${CHE_PROJECTS_ROOT}/symfony-demo-application'
+        type: exec
+        command: '$HOME/.symfony/bin/symfony server:start'
+        component: php
+  - name: Install dependencies
+    actions:
+      - workdir: '${CHE_PROJECTS_ROOT}/symfony-demo-application'
+        type: exec
+        command: >-
+          composer install && wget https://get.symfony.com/cli/installer -O - |
+          bash
+        component: php
+  - name: Stop Symfony Web Server
+    actions:
+      - workdir: '${CHE_PROJECTS_ROOT}/symfony-demo-application'
+        type: exec
+        command: '$HOME/.symfony/bin/symfony server:stop'
+        component: php

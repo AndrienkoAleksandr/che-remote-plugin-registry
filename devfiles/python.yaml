@@ -1,0 +1,29 @@
+metadata:
+  name: python-release
+projects:
+  - name: python-hello-world
+    source:
+      location: 'https://github.com/che-samples/python-hello-world.git'
+      type: git
+      branch: master
+components:
+  - memoryLimit: 512Mi
+    type: chePlugin
+    reference: >-
+      https://raw.githubusercontent.com/AndrienkoAleksandr/che-remote-plugin-registry/master/ms-python/python/latest/meta.yaml
+  - mountSources: true
+    memoryLimit: 512Mi
+    type: dockerimage
+    alias: python
+    image: 'quay.io/eclipse/che-python-3.6:nightly'
+  - type: cheEditor
+    reference: >-
+      https://raw.githubusercontent.com/AndrienkoAleksandr/che-remote-plugin-registry/master/eclipse/che-theia/latest/meta.yaml
+apiVersion: 1.0.0
+commands:
+  - name: run
+    actions:
+      - workdir: '${CHE_PROJECTS_ROOT}/python-hello-world'
+        type: exec
+        command: python hello-world.py
+        component: python
